@@ -31,6 +31,25 @@ import Chart from 'primevue/chart';
 import Card from 'primevue/card';
 import apiService from '@/services/apiService';
 
+// Color palette for charts
+const colorPalette = [
+  '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
+  '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
+  '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A',
+  '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
+  '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC',
+  '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
+  '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680',
+  '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933',
+  '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3',
+  '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'
+];
+
+// Function to generate colors from the palette
+function generateColors(count) {
+  return colorPalette.slice(0, count);
+}
+
 const doughnutChartData = ref(null);
 const doughnutChartOptions = ref(null);
 const barChartData = ref(null);
@@ -49,25 +68,23 @@ onMounted(async () => {
 });
 
 function formatDoughnutChartData(courses) {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const colors = [documentStyle.getPropertyValue('--cyan-500'), documentStyle.getPropertyValue('--orange-500'), documentStyle.getPropertyValue('--gray-500')];
-  const hoverColors = [documentStyle.getPropertyValue('--cyan-400'), documentStyle.getPropertyValue('--orange-400'), documentStyle.getPropertyValue('--gray-400')];
+  const backgroundColors = generateColors(courses.length);
+  const hoverBackgroundColors = backgroundColors.map(color => `${color}99`);
 
   return {
     labels: courses.map(course => course.current_course),
     datasets: [
       {
         data: courses.map(course => course.student_count),
-        backgroundColor: colors.slice(0, courses.length),
-        hoverBackgroundColor: hoverColors.slice(0, courses.length)
+        backgroundColor: backgroundColors,
+        hoverBackgroundColor: hoverBackgroundColors
       }
     ]
   };
 }
 
 function setDoughnutChartOptions() {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const textColor = documentStyle.getPropertyValue('--text-color');
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
 
   return {
     plugins: {
@@ -82,6 +99,7 @@ function setDoughnutChartOptions() {
 }
 
 function formatBarChartData(data) {
+  const colors = generateColors(data.length * 2); // Generate colors for both datasets
   const studentCounts = data.map(course => course.student_count);
   const averageProgresses = data.map(course => parseFloat(course.average_progress));
 
@@ -91,15 +109,15 @@ function formatBarChartData(data) {
       {
         label: 'Cantidad de estudiantes',
         data: studentCounts,
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgb(54, 162, 235)',
+        backgroundColor: colors.slice(0, data.length),
+        borderColor: colors.slice(0, data.length),
         borderWidth: 1
       },
       {
-        label: 'Progreso promedio por materia y estudiantes',
+        label: 'Progreso promedio',
         data: averageProgresses,
-        backgroundColor: 'rgba(255, 206, 86, 0.2)',
-        borderColor: 'rgb(255, 206, 86)',
+        backgroundColor: colors.slice(data.length, data.length * 2),
+        borderColor: colors.slice(data.length, data.length * 2),
         borderWidth: 1
       }
     ]
@@ -134,6 +152,7 @@ function setBarChartOptions() {
   };
 }
 </script>
+
 
 <style>
 </style>
